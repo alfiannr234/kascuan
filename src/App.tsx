@@ -26,7 +26,6 @@ import TransactionModal from './components/TransactionModal';
 import HelpCenter from './components/HelpCenter';
 import Terms from './components/Terms';
 import Privacy from './components/Privacy';
-import { API_URL } from './config';
 
 import {
   INITIAL_BUSINESS_PROFILE,
@@ -34,8 +33,9 @@ import {
   INITIAL_TRANSACTIONS
 } from './data/initialData';
 
-
 export default function App() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // 1. Core Authentication & Mode States
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return !!localStorage.getItem('token') || localStorage.getItem('isDemoMode') === 'true';
@@ -111,6 +111,7 @@ export default function App() {
         });
         return;
       }
+
       // JIKA BUKAN DEMO: Lakukan Fetch ke API Asli
       const token = localStorage.getItem('token');
       const userStr = localStorage.getItem('user');
@@ -119,7 +120,7 @@ export default function App() {
       const user = JSON.parse(userStr);
 
       try {
-        const txResponse = await fetch(`${API_URL}/api/transactions/${txData.id}`),{
+        const txResponse = await fetch(`${API_URL}/api/transactions/${user.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -131,7 +132,8 @@ export default function App() {
           }));
           setTransactions(mappedData);
         }
-        const settingsResponse = fetch(`${API_URL}/api/setting`, {
+
+        const settingsResponse = await fetch(`${API_URL}/api/setting`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -157,9 +159,8 @@ export default function App() {
       setTransactions([]);
       setBusinessProfile(INITIAL_BUSINESS_PROFILE);
     }
-  }, [isAuthenticated, isDemoMode]);
+  }, [isAuthenticated, isDemoMode, API_URL]);
 
-  // --- CRUD OPERASIONAL API ---
   const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }) => {
     // INTERCEPT JIKA MODE DEMO
     if (isDemoMode) {
@@ -176,7 +177,6 @@ export default function App() {
       return;
     }
 
-    // LOGIKA ASLI DATABASE
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
 
@@ -188,7 +188,7 @@ export default function App() {
 
     try {
       if (txData.id) {
-        const response = await fetch(`${API_URL}/api/transactions`)
+        const response = await fetch(`${API_URL}/api/transactions/${txData.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -205,7 +205,9 @@ export default function App() {
         }
       } else {
         const payload = { ...txData, user_id: user.id };
-        const response = await fetch('http://localhost:5000/api/transactions', {
+
+        // PERBAIKAN 4: Ubah localhost menjadi dinamis API_URL
+        const response = await fetch(`${API_URL}/api/transactions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -239,10 +241,10 @@ export default function App() {
       return;
     }
 
-    // LOGIKA ASLI DATABASE
+    // LOGIKA DATABASE
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/transactions/${id}`, {
+      const response = await fetch(`${API_URL}/api/transactions/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -313,7 +315,7 @@ export default function App() {
       case 'landing':
         return (
           <LandingPage
-            onJoinDemo={handleEnterDemo} // MENGGUNAKAN FUNGSI DEMO BARU
+            onJoinDemo={handleEnterDemo}
             onGoToAuth={handleGoToAuthRegister}
             onOpenLegal={(tab) => setActiveTab(tab)}
           />
@@ -390,7 +392,6 @@ export default function App() {
 
   return (
     <div className="bg-[#f8f9ff] min-h-screen text-[#0b1c30] select-none font-sans antialiased">
-
       {/* 1. Shell Sidebar & Main Contents Container */}
       {isMainShellTab && isAuthenticated ? (
         <div className="flex h-screen overflow-hidden">
