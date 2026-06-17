@@ -117,7 +117,7 @@ router.post('/request-reset-password', async (req, res) => {
             to: email,
             subject: 'PPPPP',
             html: `<p>Halo ${result.rows[0].full_name},</p>
-                   <p>Kami menerima permintaan untuk mengubah kata sandi Anda. Klik tombol di bawah ini:</p>
+                   <ppppp:</p>
                    <a href="${resetUrl}">Ubah Kata Sandi</a>`
         });
 
