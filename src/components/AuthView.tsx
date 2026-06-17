@@ -39,6 +39,9 @@ export default function AuthView({ onLoginSuccess, onToast, onOpenLegal }: AuthV
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegPassword, setShowRegPassword] = useState(false);
+  const [isForgotPasswordMode, setIsForgotPasswordMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isLoadingReset, setIsLoadingReset] = useState(false);
 
   // --- FUNGSI LOGIN ---
   const handleLogin = async (e: FormEvent) => {
@@ -147,6 +150,39 @@ export default function AuthView({ onLoginSuccess, onToast, onOpenLegal }: AuthV
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!resetEmail) {
+      onToast('Harap masukkan alamat email Anda.', 'error');
+      return;
+    }
+
+    setIsLoadingReset(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const response = await fetch(`${API_URL}/api/users/request-reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail })
+      });
+
+      if (response.ok) {
+        onToast('Tautan verifikasi sandi telah dikirim ke email Anda!', 'success');
+        setIsForgotPasswordMode(false);
+        setResetEmail('');
+      } else {
+        const data = await response.json();
+        onToast(data.message || 'Email tidak terdaftar atau gagal mengirim tautan.', 'error');
+      }
+    } catch (error) {
+      onToast('Gagal terhubung ke server.', 'error');
+    } finally {
+      setIsLoadingReset(false);
+    }
+  };
+
   const handleSocialAuth = (provider: string) => {
     onToast(`Fitur login dengan ${provider} sedang dalam tahap pengembangan.`, 'error');
   };
@@ -155,28 +191,68 @@ export default function AuthView({ onLoginSuccess, onToast, onOpenLegal }: AuthV
     <div className="max-w-[460px] w-full mx-auto space-y-6 select-none animate-in fade-in zoom-in-95 duration-200">
 
       <div className="bg-white/85 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-[#c5c6cd] shadow-xl space-y-6">
+        {isForgotPasswordMode ? (
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-extrabold text-[#091426]">Pulihkan Sandi</h3>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">Masukkan email terdaftar Anda untuk menerima tautan pemulihan sandi.</p>
+            </div>
 
-        <div className="flex border-b border-[#c5c6cd]">
-          <button
-            onClick={() => setTab('login')}
-            className={`flex-1 pb-3 text-xs font-bold transition-all border-b-2 cursor-pointer text-center ${tab === 'login'
-              ? 'text-[#091426] border-[#091426]'
-              : 'text-slate-400 border-transparent hover:text-slate-600'
-              }`}
-          >
-            Masuk Akun
-          </button>
-          <button
-            onClick={() => setTab('register')}
-            className={`flex-1 pb-3 text-xs font-bold transition-all border-b-2 cursor-pointer text-center ${tab === 'register'
-              ? 'text-[#091426] border-[#091426]'
-              : 'text-slate-400 border-transparent hover:text-slate-600'
-              }`}
-          >
-            Mulai Daftar Baru
-          </button>
-        </div>
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">EMAIL ANDA</label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 focus:bg-white border border-[#c5c6cd] focus:border-[#091426] rounded-xl focus:outline-none"
+                  placeholder="nama@email.com"
+                  required
+                />
+              </div>
+            </div>
 
+            <button
+              type="submit"
+              disabled={isLoadingReset}
+              className="w-full text-xs font-bold py-3 bg-[#091426] hover:bg-slate-800 text-[#6cf8bb] rounded-xl flex items-center justify-center gap-2 active:scale-98 transition-all shadow-md cursor-pointer pt-3.5 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+            >
+              {isLoadingReset ? 'MENGIRIM TAUTAN...' : 'KIRIM TAUTAN VERIFIKASI'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsForgotPasswordMode(false)}
+              className="w-full py-2 text-slate-500 hover:text-[#091426] text-[11px] font-bold transition-all cursor-pointer"
+            >
+              KEMBALI KE LOGIN
+            </button>
+          </form>
+
+        ) : (
+          <div className="flex border-b border-[#c5c6cd]">
+            <button
+              onClick={() => setTab('login')}
+              className={`flex-1 pb-3 text-xs font-bold transition-all border-b-2 cursor-pointer text-center ${tab === 'login'
+                ? 'text-[#091426] border-[#091426]'
+                : 'text-slate-400 border-transparent hover:text-slate-600'
+                }`}
+            >
+              Masuk Akun
+            </button>
+            <button
+              onClick={() => setTab('register')}
+              className={`flex-1 pb-3 text-xs font-bold transition-all border-b-2 cursor-pointer text-center ${tab === 'register'
+                ? 'text-[#091426] border-[#091426]'
+                : 'text-slate-400 border-transparent hover:text-slate-600'
+                }`}
+            >
+              Mulai Daftar Baru
+            </button>
+          </div>
+        )
+        }
         {tab === 'login' ? (
           <form onSubmit={handleLogin} className="space-y-4">
 
@@ -197,9 +273,15 @@ export default function AuthView({ onLoginSuccess, onToast, onOpenLegal }: AuthV
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">KATA SANDI</label>
-                <a href="#" onClick={(e) => { e.preventDefault(); onToast('Sandi reset link terkirim!', 'success'); }} className="text-[10px] text-[#00714d] hover:underline font-semibold font-sans">
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  setIsForgotPasswordMode(true);
+                }}
+                  className="text-[10px] text-[#00714d] hover:underline font-semibold font-sans"
+                >
                   Lupa Sandi?
                 </a>
+
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />

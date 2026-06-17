@@ -218,7 +218,6 @@ export default function SettingsView({
               <div className="text-center sm:text-left space-y-2">
                 <p className="font-bold text-xs text-[#0b1c30]">Logo Perusahaan</p>
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2.5">
-                  {/* Tombol yang memicu klik pada input tersembunyi */}
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
