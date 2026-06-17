@@ -206,7 +206,6 @@ export default function App() {
       } else {
         const payload = { ...txData, user_id: user.id };
 
-        // PERBAIKAN 4: Ubah localhost menjadi dinamis API_URL
         const response = await fetch(`${API_URL}/api/transactions`, {
           method: 'POST',
           headers: {

@@ -36,7 +36,9 @@ export default function SettingsView({
   setPreferences,
   onToast
 }: SettingsViewProps) {
-  // Local temporary edits
+  // Gunakan variabel dinamis Vite, bukan hardcoded localhost
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [bizName, setBizName] = useState(businessProfile.name);
   const [bizType, setBizType] = useState(businessProfile.type);
   const [bizAddress, setBizAddress] = useState(businessProfile.address);
@@ -79,7 +81,8 @@ export default function SettingsView({
         }
       };
 
-      const response = await fetch(`http://localhost:5000/api/settings`, {
+      // Perbaikan 1: Menggunakan API_URL
+      const response = await fetch(`${API_URL}/api/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -133,11 +136,11 @@ export default function SettingsView({
 
     try {
       const token = localStorage.getItem('token');
-
       const formData = new FormData();
       formData.append('logo', file);
 
-      const response = await fetch(`http://localhost:5000/api/upload-logo`, {
+      // Perbaikan 2: Menggunakan API_URL
+      const response = await fetch(`${API_URL}/api/upload-logo`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -152,7 +155,7 @@ export default function SettingsView({
       const data = await response.json();
 
       if (data.logoUrl) {
-        setBizLogo(data.logoUrl); // Perbarui state logo di UI secara instan
+        setBizLogo(data.logoUrl);
         onToast('Logo berhasil diunggah! Jangan lupa klik Simpan Perubahan.', 'success');
       } else {
         throw new Error('Format balasan server tidak sesuai.');
@@ -172,7 +175,8 @@ export default function SettingsView({
   const handleRequestPasswordReset = async () => {
     onToast('Memproses pengiriman email aman...', 'success');
     try {
-      const response = await fetch(`http://localhost:5000/api/users/request-reset-password`, {
+      // Perbaikan 3: Sintaks URL diperbaiki dari "http:/api..." menjadi dinamis
+      const response = await fetch(`${API_URL}/api/users/request-reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail })
@@ -191,11 +195,7 @@ export default function SettingsView({
 
   return (
     <div className="space-y-6 select-none animate-in fade-in duration-200">
-
-      {/* Bento Grid Layout */}
       <div className="grid grid-cols-12 gap-6">
-
-        {/* Left Column: Business Profile (Span 8) */}
         <div className="col-span-12 lg:col-span-8">
           <section className="bg-white border border-[#c5c6cd] rounded-2xl p-6 sm:p-8 space-y-6">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
@@ -208,7 +208,6 @@ export default function SettingsView({
               </div>
             </div>
 
-            {/* Logo Section */}
             <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-dashed border-[#c5c6cd]">
               <img
                 src={bizLogo}
@@ -226,7 +225,6 @@ export default function SettingsView({
                     Ganti Logo
                   </button>
 
-                  {/* Input file yang disembunyikan */}
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -247,7 +245,6 @@ export default function SettingsView({
               </div>
             </div>
 
-            {/* Fields Form */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono">NAMA BISNIS / TOKO</label>
@@ -308,9 +305,7 @@ export default function SettingsView({
           </section>
         </div>
 
-        {/* Right Column: Account & Security (Span 4) */}
         <div className="col-span-12 lg:col-span-4 space-y-6">
-          {/* User Biography Account Info Card */}
           <section className="bg-white border border-[#c5c6cd] rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
               <div className="p-2 bg-[#e5eeff] text-[#091426] rounded-xl">
@@ -352,7 +347,6 @@ export default function SettingsView({
             </div>
           </section>
 
-          {/* Preferences Settings Checkboxes Toggle */}
           <section className="bg-white border border-[#c5c6cd] rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
               <div className="p-2 bg-[#e5eeff] text-[#091426] rounded-xl">
@@ -362,7 +356,6 @@ export default function SettingsView({
             </div>
 
             <div className="space-y-4">
-              {/* Toggle Notifikasi Email */}
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-xs text-[#0b1c30]">Notifikasi Email</p>
@@ -375,13 +368,11 @@ export default function SettingsView({
                     onChange={(e) => setHasEmailNotif(e.target.checked)}
                     className="sr-only peer"
                   />
-                  {/* Background Toggle */}
                   <div className="w-full h-full bg-[#c5c6cd] rounded-full peer-checked:bg-[#006c49] transition-colors duration-200"></div>
                   <div className="w-3.5 h-3.5 bg-white rounded-full absolute left-0.5 top-0.5 transition-transform duration-200 peer-checked:translate-x-5" />
                 </label>
               </div>
 
-              {/* Toggle Laporan Mingguan */}
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-xs text-[#0b1c30]">Laporan Mingguan</p>
@@ -394,13 +385,11 @@ export default function SettingsView({
                     onChange={(e) => setHasWeeklyReport(e.target.checked)}
                     className="sr-only peer"
                   />
-                  {/* Background Toggle */}
                   <div className="w-full h-full bg-[#c5c6cd] rounded-full peer-checked:bg-[#006c49] transition-colors duration-200"></div>
                   <div className="w-3.5 h-3.5 bg-white rounded-full absolute left-0.5 top-0.5 transition-transform duration-200 peer-checked:translate-x-5" />
                 </label>
               </div>
 
-              {/* Toggle 2FA Verification */}
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-xs text-[#0b1c30]">Verifikasi 2FA</p>
@@ -413,7 +402,6 @@ export default function SettingsView({
                     onChange={(e) => setHasTwoFactor(e.target.checked)}
                     className="sr-only peer"
                   />
-                  {/* Background Toggle */}
                   <div className="w-full h-full bg-[#c5c6cd] rounded-full peer-checked:bg-[#006c49] transition-colors duration-200"></div>
                   <div className="w-3.5 h-3.5 bg-white rounded-full absolute left-0.5 top-0.5 transition-transform duration-200 peer-checked:translate-x-5" />
                 </label>
@@ -421,10 +409,8 @@ export default function SettingsView({
             </div>
           </section>
         </div>
-
       </div>
 
-      {/* Footer Interactive Actions Tracker */}
       <footer className="p-4 bg-[#f8f9ff] border border-[#c5c6cd] rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-xs text-slate-500 leading-relaxed font-sans text-center sm:text-left">
           Terakhir diatur oleh Anda pada (Admin Warung) <span className="font-semibold"></span>.
@@ -455,7 +441,6 @@ export default function SettingsView({
           </button>
         </div>
       </footer>
-
     </div>
   );
 }
