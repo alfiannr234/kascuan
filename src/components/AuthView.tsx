@@ -4,7 +4,6 @@
  */
 
 import React, { useState, FormEvent } from 'react';
-import { API_URL } from '../config';
 import { motion } from 'motion/react';
 import {
   Lock,
@@ -25,6 +24,7 @@ interface AuthViewProps {
 }
 
 export default function AuthView({ onLoginSuccess, onToast, onOpenLegal }: AuthViewProps) {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,13 +51,13 @@ export default function AuthView({ onLoginSuccess, onToast, onOpenLegal }: AuthV
     setIsLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/users/login`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-      email: loginEmail,
-      password: loginPassword
-    })
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword
+        })
+      });
 
       const data = await response.json();
 
