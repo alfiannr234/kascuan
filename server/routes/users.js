@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 import pool from '../db.js';
 
 const router = express.Router();
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const FRONTEND_URL = 'https://aplikasi-keuangan-ruddy.vercel.app';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -129,19 +129,32 @@ router.post('/request-reset-password', async (req, res) => {
 
 router.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
+
+    // 1. TAMBAHAN: Validasi keamanan awal
+    if (!token || !newPassword) {
+        return res.status(400).json({ error: 'Token dan Kata Sandi Baru wajib diisi.' });
+    }
+
+    if (newPassword.length < 8) {
+        return res.status(400).json({ error: 'Kata sandi baru minimal harus 8 karakter.' });
+    }
+
     try {
-        // Cek token apakah valid dan belum expired
+        const currentTime = new Date();
+
         const userRes = await pool.query(
-            'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
-            [token]
+            'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > $2',
+            [token, currentTime]
         );
 
-        if (userRes.rows.length === 0) return res.status(400).json({ error: 'Token tidak valid atau sudah kedaluwarsa.' });
+        if (userRes.rows.length === 0) {
+            return res.status(400).json({ error: 'Token tidak valid atau sudah kedaluwarsa.' });
+        }
 
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(newPassword, salt);
 
-        // Update sandi dan hapus token
+        // 4. Eksekusi Update
         await pool.query(
             'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
             [password_hash, userRes.rows[0].id]
@@ -149,7 +162,8 @@ router.post('/reset-password', async (req, res) => {
 
         res.status(200).json({ message: 'Kata sandi berhasil diubah! Silakan masuk kembali.' });
     } catch (err) {
-        res.status(500).json({ error: 'Gagal mengubah kata sandi.' });
+        console.error("Error Reset Password:", err);
+        res.status(500).json({ error: 'Gagal mengubah kata sandi akibat masalah server.' });
     }
 });
 
