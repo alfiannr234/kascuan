@@ -36,7 +36,6 @@ export default function SettingsView({
   setPreferences,
   onToast
 }: SettingsViewProps) {
-  // Gunakan variabel dinamis Vite, bukan hardcoded localhost
   const API_URL = import.meta.env.VITE_API_URL;
 
   const [bizName, setBizName] = useState(businessProfile.name);

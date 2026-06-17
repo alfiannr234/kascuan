@@ -115,7 +115,7 @@ router.post('/request-reset-password', async (req, res) => {
         await transporter.sendMail({
             from: `"KasCuan" <${process.env.EMAIL_USER}>`,
             to: email,
-            subject: 'Permintaan Perubahan Kata Sandi',
+            subject: 'PPPPP',
             html: `<p>Halo ${result.rows[0].full_name},</p>
                    <p>Kami menerima permintaan untuk mengubah kata sandi Anda. Klik tombol di bawah ini:</p>
                    <a href="${resetUrl}">Ubah Kata Sandi</a>`
