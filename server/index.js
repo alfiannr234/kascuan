@@ -5,7 +5,8 @@ import pool from './db.js';
 import transactionRoutes from './routes/transactions.js';
 import userRoutes from './routes/users.js';
 import settingsRoutes from './routes/settings.js';
-
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first');
 dotenv.config();
 
 const app = express();
