@@ -34,4 +34,4 @@ export interface Preferences {
   twoFactorAuth: boolean;
 }
 
-export type ActiveTab = 'landing' | 'dashboard' | 'income' | 'expenses' | 'reports' | 'settings' | 'auth' | 'help' | 'terms' | 'privacy';
+export type ActiveTab = 'landing' | 'dashboard' | 'income' | 'expenses' | 'reports' | 'settings' | 'auth' | 'help' | 'terms' | 'privacy' | 'reset-password';

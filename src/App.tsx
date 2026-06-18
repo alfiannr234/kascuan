@@ -26,6 +26,7 @@ import TransactionModal from './components/TransactionModal';
 import HelpCenter from './components/HelpCenter';
 import Terms from './components/Terms';
 import Privacy from './components/Privacy';
+import ResetPasswordView from './components/ResetPasswordView';
 
 import {
   INITIAL_BUSINESS_PROFILE,
@@ -46,6 +47,9 @@ export default function App() {
   });
 
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
+    if (window.location.pathname === '/reset-password') {
+      return 'reset-password';
+    }
     return (localStorage.getItem('token') || localStorage.getItem('isDemoMode') === 'true') ? 'dashboard' : 'landing';
   });
 
@@ -380,6 +384,18 @@ export default function App() {
         return (
           <div className="max-w-4xl mx-auto py-8">
             <Privacy />
+          </div>
+        );
+      case 'reset-password':
+        return (
+          <div className="flex items-center justify-center min-h-[calc(100vh-160px)] px-4 py-8">
+            <ResetPasswordView
+              onToast={dispatchToast}
+              onGoToLogin={() => {
+                window.history.replaceState({}, document.title, "/");
+                setActiveTab('auth');
+              }}
+            />
           </div>
         );
       default:
