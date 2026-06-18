@@ -105,7 +105,7 @@ router.post('/request-reset-password', async (req, res) => {
                 'content-type': 'application/json'
             },
             body: JSON.stringify({
-                sender: { email: 'adminkascuan@gmail.com', name: 'KasCuan' },
+                sender: { email: 'muhjalalludin01@gmail.com', name: 'KasCuan' },
                 to: [{ email: req.body.email }],
                 subject: 'Permintaan Perubahan Kata Sandi KasCuan',
                 htmlContent: `
