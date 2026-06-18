@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import pool from '../db.js';
+import dns from 'dns'
+
+dns.setDefaultResultOrder('ipv4first');
 
 const router = express.Router();
 const FRONTEND_URL = 'kascuan-six.vercel.app';
