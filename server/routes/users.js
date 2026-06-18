@@ -11,31 +11,6 @@ dns.setDefaultResultOrder('ipv4first');
 const router = express.Router();
 const FRONTEND_URL = 'https://kascuan-six.vercel.app';
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_APP_PASSWORD
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    family: 4
-});
-
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log("Koneksi error:", error);
-    } else {
-        console.log("Server siap mengirim pesan!");
-    }
-});
-
 router.post('/register', async (req, res) => {
     const client = await pool.connect();
     try {
@@ -120,18 +95,37 @@ router.post('/request-reset-password', async (req, res) => {
 
         if (result.rows.length === 0) return res.status(404).json({ error: 'Email tidak ditemukan.' });
 
-        // Kirim Email
-        const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
-        await transporter.sendMail({
-            from: `"KasCuan" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: 'Permintaan Perubahan Kata Sandi',
-            html: `<p>Halo ${result.rows[0].full_name},</p>
-                   <p>Kami menerima permintaan untuk mengubah kata sandi Anda. Klik tombol di bawah ini:</p>
-                   <a href="${resetUrl}">Ubah Kata Sandi</a>`
+        const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { email: 'adminkascuan@gmail.com', name: 'KasCuan' },
+                to: [{ email: req.body.email }],
+                subject: 'Permintaan Perubahan Kata Sandi KasCuan',
+                htmlContent: `
+                <h3>Halo!</h3>
+                <p>Kami menerima permintaan untuk mereset kata sandi akun KasCuan Anda.</p>
+                <p>Silakan klik tautan di bawah ini untuk membuat sandi baru:</p>
+                <a href="${resetLink}" style="padding: 10px 15px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">Reset Kata Sandi</a>
+                <p>Jika Anda tidak meminta ini, abaikan saja email ini.</p>
+            `
+            })
         });
 
-        res.status(200).json({ message: 'Tautan reset sandi telah dikirim ke email Anda.' });
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Brevo API Error:', errorData);
+            throw new Error('Gagal dari sisi API Brevo');
+        }
+
+        res.status(200).json({ message: 'Tautan pemulihan sandi berhasil dikirim ke email.' });
+
     } catch (err) {
         console.error('ERROR LUPA SANDI:', err);
         res.status(500).json({ error: 'Gagal mengirim email reset sandi.' });
