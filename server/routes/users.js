@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 import pool from '../db.js';
 
 const router = express.Router();
-const FRONTEND_URL = 'https://aplikasi-keuangan-ruddy.vercel.app';
+const FRONTEND_URL = 'kascuan-six.vercel.app';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
