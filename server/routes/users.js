@@ -103,6 +103,7 @@ router.get('/verify-email', async (req, res) => {
 router.post('/request-reset-password', async (req, res) => {
     const { email } = req.body;
     try {
+
         const resetToken = crypto.randomBytes(32).toString('hex');
         const expireDate = new Date(Date.now() + 3600000);
         const result = await pool.query(
@@ -125,6 +126,7 @@ router.post('/request-reset-password', async (req, res) => {
 
         res.status(200).json({ message: 'Tautan reset sandi telah dikirim ke email Anda.' });
     } catch (err) {
+        console.error('ERROR LUPA SANDI:', err);
         res.status(500).json({ error: 'Gagal mengirim email reset sandi.' });
     }
 });
