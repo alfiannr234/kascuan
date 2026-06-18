@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 node_modules/
 build/
 dist/
@@ -8,6 +9,8 @@ coverage/
 .env*
 !.env.example
 =======
+=======
+>>>>>>> 5c510c78ca8cca3340dc13d1d22213dcc03ed680
 # Logs
 logs
 *.log
@@ -151,4 +154,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+<<<<<<< HEAD
 >>>>>>> d1dedee74fefff19eee07528e95b0eb03489212a
+=======
+>>>>>>> 5c510c78ca8cca3340dc13d1d22213dcc03ed680
