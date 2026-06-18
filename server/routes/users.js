@@ -9,7 +9,7 @@ import dns from 'dns'
 dns.setDefaultResultOrder('ipv4first');
 
 const router = express.Router();
-const FRONTEND_URL = 'kascuan-six.vercel.app';
+const FRONTEND_URL = 'https://kascuan-six.vercel.app';
 
 const transporter = nodemailer.createTransport({
     auth: {
