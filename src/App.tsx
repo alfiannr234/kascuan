@@ -291,6 +291,8 @@ export default function App() {
       setBusinessProfile(prev => ({ ...prev, name: bizName }));
     }
     setActiveTab('dashboard');
+
+    window.history.replaceState({}, document.title, "/");
   };
 
   // --- MASUK KE MODE DEMO (DIPICU DARI LANDING PAGE) ---
