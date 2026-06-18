@@ -12,7 +12,6 @@ const router = express.Router();
 const FRONTEND_URL = 'kascuan-six.vercel.app';
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_APP_PASSWORD
