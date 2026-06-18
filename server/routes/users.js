@@ -12,6 +12,10 @@ const router = express.Router();
 const FRONTEND_URL = 'https://kascuan-six.vercel.app';
 
 const transporter = nodemailer.createTransport({
+    // KITA TULIS MATI DI SINI AGAR TIDAK TERSESAT KE LOCALHOST
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_APP_PASSWORD
