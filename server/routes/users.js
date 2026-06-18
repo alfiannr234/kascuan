@@ -23,7 +23,8 @@ const transporter = nodemailer.createTransport({
         rejectUnauthorized: false
     },
     connectionTimeout: 10000,
-    greetingTimeout: 10000
+    greetingTimeout: 10000,
+    family: 4
 });
 
 transporter.verify(function (error, success) {
