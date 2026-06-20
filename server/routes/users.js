@@ -45,23 +45,48 @@ router.post('/register', async (req, res) => {
         await client.query('COMMIT');
 
         const verificationUrl = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
-        console.log('Skip email verification sementara');
-        await transporter.sendMail({
-            from: `"KasCuan" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: 'Verifikasi Akun KasCuan Anda',
-            html: `<h3>Selamat datang di KasCuan!</h3>
-                   <p>Halo ${full_name}, silakan klik tautan di bawah ini untuk memverifikasi akun Anda:</p>
-                   <a href="${verificationUrl}" style="padding:10px 20px; background-color:#006c49; color:white; text-decoration:none; border-radius:8px;">Verifikasi Email Saya</a>
-                   <p>Jika Anda tidak mendaftar, abaikan email ini.</p>`
+        console.log('Mengirim email verifikasi via Brevo API...');
+
+        // GANTI BLOK TRANSPORTER.SENDMAIL DENGAN INI:
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { email: 'email_anda@gmail.com', name: 'KasCuan' }, // WAJIB GANTI DENGAN EMAIL BREVO ANDA
+                to: [{ email: email }],
+                subject: 'Verifikasi Akun KasCuan Anda',
+                htmlContent: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h3 style="color: #091426;">Selamat datang di KasCuan!</h3>
+                        <p>Halo <strong>${full_name}</strong>,</p>
+                        <p>Terima kasih telah bergabung. Silakan klik tombol di bawah ini untuk memverifikasi alamat email dan mengaktifkan akun Anda:</p>
+                        <div style="margin: 30px 0;">
+                            <a href="${verificationUrl}" style="padding: 12px 24px; background-color: #091426; color: #6cf8bb; text-decoration: none; border-radius: 8px; font-weight: bold;">Verifikasi Email Saya</a>
+                        </div>
+                        <p style="color: #666; font-size: 14px;">Jika Anda tidak merasa mendaftar di KasCuan, abaikan saja email ini.</p>
+                    </div>
+                `
+            })
         });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Brevo API Error saat Register:', errorData);
+            // Kita tidak perlu melempar error agar registrasi tidak gagal 
+            // hanya karena email telat, tapi kita catat di log.
+        }
 
         res.status(201).json({
             message: 'Registrasi berhasil! Silakan cek email Anda untuk verifikasi sebelum masuk.'
         });
+
     } catch (err) {
         await client.query('ROLLBACK');
-        console.error(err.message);
+        console.error('ERROR REGISTER:', err.message);
         res.status(500).json({ error: 'Server error saat registrasi' });
     } finally {
         client.release();
